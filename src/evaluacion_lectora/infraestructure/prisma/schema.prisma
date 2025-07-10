@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+model Quiz {
+  id            Int          @id @default(autoincrement())
+  idLibro       Int
+  idUsuario     Int          // Agregar campo para el usuario
+  pagina        Int          // Agregar campo para la página actual
+  fechaCreacion DateTime     @default(now())
+  paginaInicio  Int
+  paginaFin     Int
+  preguntas     Pregunta[]
+  intentos      IntentoQuiz[]
+}
+
+model Pregunta {
+  id            Int          @id @default(autoincrement())
+  idQuiz        Int
+  textoPregunta String       @db.Text
+  quiz          Quiz         @relation(fields: [idQuiz], references: [id])
+  respuestas    Respuesta[]
+}
+
+model Respuesta {
+  id             Int         @id @default(autoincrement())
+  idPregunta     Int
+  textoRespuesta String      @db.Text
+  esCorrecta     Boolean
+  pregunta       Pregunta    @relation(fields: [idPregunta], references: [id])
+}
+
+model IntentoQuiz {
+  id              Int        @id @default(autoincrement())
+  idUsuario       Int       
+  idQuiz          Int
+  fechaIntento    DateTime   @default(now())
+  puntajeObtenido Int
+  aprobado        Boolean
+  quiz            Quiz       @relation(fields: [idQuiz], references: [id])
+}
