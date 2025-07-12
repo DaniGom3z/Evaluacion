@@ -10,12 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuizController = void 0;
-const LibroGateway_1 = require("../../http/gateways/LibroGateway");
 class QuizController {
-    constructor(generarQuizUseCase, obtenerQuizUseCase, responderQuizUseCase) {
-        this.generarQuizUseCase = generarQuizUseCase;
-        this.obtenerQuizUseCase = obtenerQuizUseCase;
-        this.responderQuizUseCase = responderQuizUseCase;
+    constructor(applicationService) {
+        this.applicationService = applicationService;
     }
     generarQuiz(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -27,15 +24,8 @@ class QuizController {
                     res.status(400).json({ error: 'Faltan parámetros obligatorios' });
                     return;
                 }
-                const libroGateway = new LibroGateway_1.LibroGateway();
-                const [contenidoHTML] = yield libroGateway.obtenerFragmentosHTMLDesdeS3(s3Path, paginaActual, paginaActual);
-                const quizId = yield this.generarQuizUseCase.execute({
-                    idUsuario: Number(idUsuario),
-                    idLibro,
-                    paginaActual,
-                    contenidoHTML
-                });
-                res.status(201).json({ quizId });
+                const resultado = yield this.applicationService.generarQuiz(Number(idUsuario), idLibro, paginaActual, s3Path);
+                res.status(201).json(resultado);
             }
             catch (err) {
                 console.error('Error al generar quiz:', err);
@@ -43,17 +33,15 @@ class QuizController {
             }
         });
     }
-    // GET /quizzes/:id
     obtenerQuiz(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            // sin cambios
             try {
                 const id = Number(req.params.id);
                 if (isNaN(id)) {
                     res.status(400).json({ error: 'ID inválido' });
                     return;
                 }
-                const quiz = yield this.obtenerQuizUseCase.execute(id);
+                const quiz = yield this.applicationService.obtenerQuiz(id);
                 res.status(200).json(quiz);
             }
             catch (err) {
@@ -61,11 +49,9 @@ class QuizController {
             }
         });
     }
-    // POST /quizzes/:id/responder
     responderQuiz(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a;
-            // sin cambios
             try {
                 const idQuiz = Number(req.params.id);
                 const idUsuario = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
@@ -74,11 +60,7 @@ class QuizController {
                     res.status(400).json({ error: 'Datos incompletos' });
                     return;
                 }
-                const resultado = yield this.responderQuizUseCase.execute({
-                    idQuiz,
-                    idUsuario: Number(idUsuario),
-                    respuestas
-                });
+                const resultado = yield this.applicationService.responderQuiz(idQuiz, Number(idUsuario), respuestas);
                 res.status(200).json(resultado);
             }
             catch (err) {

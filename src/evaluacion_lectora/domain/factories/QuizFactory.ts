@@ -1,17 +1,20 @@
 import { Quiz } from '../entities/Quiz';
 import { Pregunta } from '../entities/Pregunta';
+import { LibroId } from '../value-objects/LibroId';
+import { UsuarioId } from '../value-objects/UsuarioId';
+import { Pagina } from '../value-objects/Pagina';
 
 export class QuizFactory {
   /**
    * Crea un quiz nuevo (sin ID, se asignará al persistir)
    */
   static crearNuevo(
-    idLibro: number,
-    idUsuario: number,
-    pagina: number,
-    preguntas: Pregunta[]
+    libroId: LibroId,
+    usuarioId: UsuarioId,
+    pagina: Pagina,
+    preguntas: Pregunta[] = []
   ): Quiz {
-    return new Quiz(idLibro, idUsuario, pagina, preguntas);
+    return Quiz.crearNuevo(libroId, usuarioId, pagina, preguntas);
   }
 
   /**
@@ -25,6 +28,6 @@ export class QuizFactory {
     fecha: Date,
     preguntas: Pregunta[]
   ): Quiz {
-    return new Quiz(idLibro, idUsuario, pagina, preguntas, id, fecha);
+    return Quiz.reconstruir(id, idLibro, idUsuario, pagina, fecha, preguntas);
   }
 }

@@ -20,14 +20,14 @@ const prismaClient_1 = __importDefault(require("../prisma/prismaClient"));
 class QuizPrismaRepository {
     crearConPreguntas(quiz) {
         return __awaiter(this, void 0, void 0, function* () {
-            const paginaInicio = quiz.getPagina() - 9;
+            const paginaInicio = quiz.getPagina().getValue() - 9;
             const created = yield prismaClient_1.default.quiz.create({
                 data: {
-                    idLibro: quiz.getLibroId(),
-                    idUsuario: quiz.getUsuarioId(),
-                    pagina: quiz.getPagina(),
+                    idLibro: quiz.getLibroId().getValue(),
+                    idUsuario: quiz.getUsuarioId().getValue(),
+                    pagina: quiz.getPagina().getValue(),
                     paginaInicio,
-                    paginaFin: quiz.getPagina(),
+                    paginaFin: quiz.getPagina().getValue(),
                     preguntas: {
                         create: quiz.getPreguntas().map(p => ({
                             textoPregunta: p.getTexto(),

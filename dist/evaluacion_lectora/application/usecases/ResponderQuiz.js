@@ -11,19 +11,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ResponderQuiz = void 0;
 const IntentoQuiz_1 = require("../../domain/entities/IntentoQuiz");
+const QuizCompletadoEvent_1 = require("../../domain/events/QuizCompletadoEvent");
+const QuizId_1 = require("../../domain/value-objects/QuizId");
+const UsuarioId_1 = require("../../domain/value-objects/UsuarioId");
 class ResponderQuiz {
-    constructor(quizRepo, intentoRepo) {
+    constructor(quizRepo, intentoRepo, eventBus) {
         this.quizRepo = quizRepo;
         this.intentoRepo = intentoRepo;
+        this.eventBus = eventBus;
     }
     execute(input) {
         return __awaiter(this, void 0, void 0, function* () {
             const { idUsuario, idQuiz, respuestas } = input;
-            // 1️⃣ Obtener quiz completo
-            const quiz = yield this.quizRepo.encontrarPorId(idQuiz);
+            const quizId = QuizId_1.QuizId.create(idQuiz);
+            const usuarioId = UsuarioId_1.UsuarioId.create(idUsuario);
+            // Obtener quiz completo
+            const quiz = yield this.quizRepo.encontrarPorId(quizId.getValue());
             if (!quiz)
                 throw new Error('Quiz no encontrado');
-            // 2️⃣ Calcular puntaje
+            // Calcular puntaje
             let puntaje = 0;
             for (const respuestaUsuario of respuestas) {
                 const pregunta = quiz
@@ -38,10 +44,17 @@ class ResponderQuiz {
                     puntaje++;
             }
             const aprobado = puntaje >= ResponderQuiz.MIN_APROBADO;
-            // 3️⃣ Crear entidad IntentoQuiz y guardar
+            // Crear entidad IntentoQuiz y guardar
             const intento = new IntentoQuiz_1.IntentoQuiz(idQuiz, idUsuario, puntaje);
             yield this.intentoRepo.guardarIntento(intento);
-            return { puntaje, aprobado };
+            // Publicar domain event
+            const event = new QuizCompletadoEvent_1.QuizCompletadoEvent(quizId, usuarioId, puntaje, aprobado);
+            yield this.eventBus.publish(event);
+            return {
+                puntaje,
+                aprobado,
+                mensaje: aprobado ? '¡Felicitaciones! Has aprobado el quiz.' : 'Necesitas más práctica. ¡Sigue intentando!'
+            };
         });
     }
 }

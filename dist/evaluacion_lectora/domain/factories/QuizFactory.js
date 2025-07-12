@@ -6,14 +6,14 @@ class QuizFactory {
     /**
      * Crea un quiz nuevo (sin ID, se asignará al persistir)
      */
-    static crearNuevo(idLibro, idUsuario, pagina, preguntas) {
-        return new Quiz_1.Quiz(idLibro, idUsuario, pagina, preguntas);
+    static crearNuevo(libroId, usuarioId, pagina, preguntas = []) {
+        return Quiz_1.Quiz.crearNuevo(libroId, usuarioId, pagina, preguntas);
     }
     /**
      * Reconstruye un quiz ya existente (cargado de la BD)
      */
     static reconstruir(id, idLibro, idUsuario, pagina, fecha, preguntas) {
-        return new Quiz_1.Quiz(idLibro, idUsuario, pagina, preguntas, id, fecha);
+        return Quiz_1.Quiz.reconstruir(id, idLibro, idUsuario, pagina, fecha, preguntas);
     }
 }
 exports.QuizFactory = QuizFactory;

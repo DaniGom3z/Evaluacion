@@ -8,15 +8,15 @@ import prisma from '../prisma/prismaClient';
 
 export class QuizPrismaRepository implements QuizRepository {
   async crearConPreguntas(quiz: Quiz): Promise<Quiz> {
-    const paginaInicio = quiz.getPagina() - 9;
+    const paginaInicio = quiz.getPagina().getValue() - 9;
 
     const created = await prisma.quiz.create({
       data: {
-        idLibro: quiz.getLibroId(),
-        idUsuario: quiz.getUsuarioId(),
-        pagina: quiz.getPagina(),
+        idLibro: quiz.getLibroId().getValue(),
+        idUsuario: quiz.getUsuarioId().getValue(),
+        pagina: quiz.getPagina().getValue(),
         paginaInicio,
-        paginaFin: quiz.getPagina(),
+        paginaFin: quiz.getPagina().getValue(),
         preguntas: {
           create: quiz.getPreguntas().map(p => ({
             textoPregunta: p.getTexto(),
